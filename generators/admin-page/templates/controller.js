@@ -47,9 +47,9 @@ angular.module('<%= app_name %>')
 
             $mdDialog.show(confirm).then(function() {
                <%= model %>ToDelete.$delete(function(){
-               		var index = <%= list %>.indexOf(<%= model %>ToDelete);
+               		var index = $scope.<%= list %>.indexOf(<%= model %>ToDelete);
                		if(index != -1){
-               			<%= list %>.splice(index, 1);
+               			$scope.<%= list %>.splice(index, 1);
                		}
                });
             }, function() {

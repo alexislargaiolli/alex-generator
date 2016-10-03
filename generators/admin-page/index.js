@@ -6,7 +6,7 @@ module.exports = generators.Base.extend({
     constructor: function() {
         // Calling the super constructor is important so our generator is correctly set up
         generators.Base.apply(this, arguments);
-        this.argument('appname', { type: String, required: false, defaults : this.appname + 'App' });
+        this.argument('appname', { type: String, required: false, defaults: this.appname + 'App' });
     },
     prompting: {
 
@@ -19,7 +19,7 @@ module.exports = generators.Base.extend({
                 type: 'input',
                 name: 'folder',
                 message: 'Dans quel dossier ?',
-                default: 'client/app'
+                default: 'client/app/admin'
             }, {
                 type: 'input',
                 name: 'service',
@@ -34,7 +34,7 @@ module.exports = generators.Base.extend({
                 message: 'Nom de la liste d\'éléments ? (Exemple : Liste des nom_du_model)'
             }, {
                 type: 'confirm',
-                name: 'addFormInput',
+                name: 'defineAddFormInputs',
                 message: 'Voulez-vous définir les champs du formulaire d\'ajout ?'
             }]).then(function(answers) {
                 this.answers = answers;
@@ -98,8 +98,11 @@ module.exports = generators.Base.extend({
                     done();
                 }
             }
-
-            promtFormElt(handleResult);
+            if (this.answers.defineAddFormInputs) {
+                promtFormElt(handleResult);
+            } else {
+                done();
+            }
         },
         /* Ask if user want to define edit form inputs */
         promptEditForm: function() {
@@ -189,7 +192,7 @@ module.exports = generators.Base.extend({
             app_name: this.appname,
             model: this.answers.model,
             Model: Model,
-            folder: this.answers.folder,
+            folder: this.answers.folder + "/" + this.answers.model,
             list: this.answers.model + 'List',
             create_title: this.answers.create_title,
             list_title: this.answers.list_title,
@@ -204,16 +207,27 @@ module.exports = generators.Base.extend({
 
         this.fs.copyTpl(
             this.templatePath('list.html'),
-            this.destinationPath(this.answers.folder + '/' + this.answers.model + '.html'), options
+            this.destinationPath(options.folder + '/' + this.answers.model + '.html'), options
+        );
+        this.fs.copyTpl(
+            this.templatePath('route.js'),
+            this.destinationPath(options.folder + '/' + this.answers.model + '.js'), options
         );
         this.fs.copyTpl(
             this.templatePath('create.html'),
-            this.destinationPath(this.answers.folder + '/' + this.answers.model + '.create.html'), options
+            this.destinationPath(options.folder + '/' + this.answers.model + '.create.html'), options
         );
         this.fs.copyTpl(
             this.templatePath('controller.js'),
-            this.destinationPath(this.answers.folder + '/' + this.answers.model + '.controller.js'), options
+            this.destinationPath(options.folder + '/' + this.answers.model + '.controller.js'), options
         );
+
+        this.composeWith('alex:resource-service', {
+            options: {
+                model: this.answers.model,
+                folder: options.folder
+            }
+        });
     }
 
 });
