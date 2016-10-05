@@ -24,23 +24,88 @@ module.exports = generators.Base.extend({
                 type: 'input',
                 name: 'service',
                 message: 'Quel est le nom du service associé à ce model ? (exemple nom_du_modelService)'
-            }, {
-                type: 'input',
-                name: 'create_title',
-                message: 'Nom du formulaire d\'ajout d\'un nouvel élément ? (Exemple : Nouveau nom_du_model)'
-            }, {
-                type: 'input',
-                name: 'list_title',
-                message: 'Nom de la liste d\'éléments ? (Exemple : Liste des nom_du_model)'
-            }, {
-                type: 'confirm',
-                name: 'defineAddFormInputs',
-                message: 'Voulez-vous définir les champs du formulaire d\'ajout ?'
             }]).then(function(answers) {
                 this.answers = answers;
             }.bind(this));
         },
+        promptDatatableColumns: function() {
+            return this.prompt([{
+                type: 'confirm',
+                name: 'defineDatatableColumn',
+                message: 'Voulez-vous définir les colonnes de la datatable ?'
+            }]).then(function(answers) {
+                this.defineDatatableColumn = answers.defineDatatableColumn;
+            }.bind(this));
+        },
+        promptDatatableColumnsInputs: function() {
+            this.datatableColumns = [];
+            var that = this;
+            var done = this.async();
+            var promtFormElt = function(cb) {
+                that.prompt([{
+                    type: 'input',
+                    name: 'attribute',
+                    message: 'Nom de l\'attribut du model ?'
+                }, {
+                    type: 'input',
+                    name: 'label',
+                    message: 'Nom de la colonne ?'
+                }, {
+                    type: 'list',
+                    name: 'type',
+                    message: 'Type d\'affichage ?',
+                    choices: [{
+                        name: 'Text',
+                        value: 'text'
+                    }, {
+                        name: 'Number',
+                        value: 'select'
+                    }, {
+                        name: 'Email',
+                        value: 'email'
+                    }, {
+                        name: 'Tel',
+                        value: 'tel'
+                    }, {
+                        name: 'Checkbox',
+                        value: 'checkbox'
+                    }]
+                }, {
+                    type: 'confirm',
+                    name: 'continueColumn',
+                    message: 'Voulez-vous définir une nouvelle colonne ?'
+                }]).then(cb);
+            }
+            var handleResult = function(answers) {
+                that.datatableColumns.push({
+                    attribute: answers.attribute,
+                    label: answers.label,
+                    type: answers.type
+                });
+
+                if (answers.continueColumn) {
+                    promtFormElt(handleResult);
+                } else {
+                    done();
+                }
+            }
+            if (this.defineDatatableColumn) {
+                promtFormElt(handleResult);
+            } else {
+                done();
+            }
+        },
+        /* Ask if user want to define edit form inputs */
         promptCreateForm: function() {
+            return this.prompt([{
+                type: 'confirm',
+                name: 'defineAddFormInputs',
+                message: 'Voulez-vous définir les champs du formulaire d\'ajout ?'
+            }]).then(function(answers) {
+                this.defineAddFormInputs = answers.defineAddFormInputs;
+            }.bind(this));
+        },
+        promptCreateFormInputs: function() {
             this.createFormInputs = [];
             var that = this;
             var done = this.async();
@@ -98,7 +163,7 @@ module.exports = generators.Base.extend({
                     done();
                 }
             }
-            if (this.answers.defineAddFormInputs) {
+            if (this.defineAddFormInputs) {
                 promtFormElt(handleResult);
             } else {
                 done();
@@ -193,14 +258,11 @@ module.exports = generators.Base.extend({
             model: this.answers.model,
             Model: Model,
             folder: this.answers.folder + "/" + this.answers.model,
-            list: this.answers.model + 'List',
-            create_title: this.answers.create_title,
-            list_title: this.answers.list_title,
             controllerName: 'Create' + Model + 'Controller',
             selectedName: 'selected' + Model,
             addMethod: 'add' + Model,
-            deleteMethod: 'delete' + Model,
             serviceName: this.answers.service,
+            columns : this.datatableColumns,
             createFormInputs: this.createFormInputs,
             editFormInputs: this.editFormInputs
         };

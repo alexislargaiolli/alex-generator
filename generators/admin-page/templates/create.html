@@ -1,4 +1,4 @@
-<md-dialog aria-label="<%= create_title %>">
+<md-dialog aria-label="Nouveau">
     <form name="createForm" ng-cloak>
         <md-toolbar>
             <div class="md-toolbar-tools">
@@ -12,10 +12,16 @@
             <div class="md-dialog-content">
                 <% for(var i=0; i<createFormInputs.length; i++) {%>
                     <md-input-container class="md-block" flex-gt-sm>
-                        <label><%= createFormInputs[i].label %></label>
-                        <input ng-model="<%= model %>.<%= createFormInputs[i].attribute %>" type="<%= createFormInputs[i].type %>" required="<%= createFormInputs[i].required %>">
+                        <% if(createFormInputs[i].type != 'checkbox'){ %>
+                            <label><%= createFormInputs[i].label %></label>
+                            <input ng-model="<%= model %>.<%= createFormInputs[i].attribute %>" type="<%= createFormInputs[i].type %>" required="<%= createFormInputs[i].required %>">
+                        <% } else { %>
+                            <md-checkbox ng-model="<%= model %>.<%= createFormInputs[i].attribute %>" aria-label="<%= createFormInputs[i].label %>" required="<%= createFormInputs[i].required %>">
+                                <%= createFormInputs[i].label %>
+                            </md-checkbox>
+                        <% } %>
                     </md-input-container>
-                    <% } %>
+                <% } %>
             </div>
         </md-dialog-content>
         <md-dialog-actions layout="row">
