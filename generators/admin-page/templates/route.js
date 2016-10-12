@@ -6,7 +6,7 @@ angular.module('<%= app_name %>')
       .state('admin.<%= model %>', {
         url: '/<%= model %>',
         templateUrl: 'app/admin/<%= model %>/<%= model %>.html',
-        controller: '<%= Model %>Ctrl',
+        controller: 'Admin<%= Model %>Ctrl',
         authenticate : true
       });
   });

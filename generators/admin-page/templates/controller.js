@@ -1,78 +1,84 @@
 'use strict';
 
 angular.module('<%= app_name %>')
-    .controller('<%= Model %>Ctrl', function($scope, $mdDialog, $mdMedia, $mdToast, <%= serviceName %>) {
-        $scope.<%= selectedName %>;
+    .controller('Admin<%= Model %>Ctrl', function($scope, $mdDialog, $mdMedia, $mdToast, <%= serviceName %>) {
+        $scope.
+        <%= selectedName %> = null;
         $scope.datas = null;
         $scope.selected = [];
         $scope.query = {
             order: 'name',
             limit: 5,
             page: 1
-          };
-
-        activate();
+        };
 
         function activate() {
             loadDatas();
         }
+        activate();
 
-        function loadDatas(){
+        function loadDatas() {
             $scope.promise = <%= serviceName %>.paginate($scope.query, loadDatasSuccess).$promise;
         }
-        
+
         function loadDatasSuccess(datas) {
             $scope.datas = datas;
         }
 
-        $scope.loadDatas = function(){
+        $scope.loadDatas = function() {
             loadDatas();
-        }
+        };
 
-        $scope.hasMultipleSelected = function(){
+        $scope.hasMultipleSelected = function() {
             return $scope.selected.length > 1;
-        }  
+        };
 
-        $scope.hasOneSelected = function(){
-            return $scope.selected.length == 1;
-        }
+        $scope.hasOneSelected = function() {
+            return $scope.selected.length === 1;
+        };
 
-        $scope.hasSelected = function(){
+        $scope.hasSelected = function() {
             return $scope.selected.length > 0;
-        }          
+        };
 
         $scope.select = function(<%= model %>) {
-            $scope.<%= selectedName %> = <%= model %>;
-        }
+            $scope.
+            <%= selectedName %> = <%= model %>;
+        };
 
-        $scope.clearSelection = function(){
-            $scope.selected = [];   
-        }
+        $scope.clearSelection = function() {
+            $scope.selected = [];
+        };
 
-		$scope.saveSelected = function() {
-            <%= serviceName %>.update({}, $scope.<%= selectedName %>, function() {
-                $scope.<%= selectedName %> = null;
-                $mdToast.show(
-                    $mdToast.simple()
-                    .textContent('Sauvegarde réussie.')
-                    .position('bottom right')
-                    .toastClass('success-toast')
-                    .hideDelay(3000)
-                );
-            });
-        }        
+        $scope.saveSelected = function() {
+            <%= serviceName %>.update({}, $scope.
+                <%= selectedName %>,
+                function() {
+                    $scope.
+                    <%= selectedName %> = null;
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .textContent('Sauvegarde réussie.')
+                        .position('bottom right')
+                        .toastClass('success-toast')
+                        .hideDelay(3000)
+                    );
+                });
+        };
 
         $scope.showAddForm = function(ev) {
             $mdDialog.show({
                     controller: <%= controllerName %>,
-                    templateUrl: "<%= folder.replace('client/', '') %>/<%= model %>.create.html",
+                    templateUrl: '<%= folder.replace('
+                    client / ', '
+                    ') %>/<%= model %>.create.html',
                     parent: angular.element(document.body),
                     targetEvent: ev,
                     clickOutsideToClose: true
                 })
                 .then(function(<%= model %>) {
-                    <%= model %>.$save(function(elt){
-                    	$scope.loadDatas();
+                    <%= model %>.$save(function() {
+                        $scope.loadDatas();
                     });
                 }, function() {});
         };
@@ -85,8 +91,10 @@ angular.module('<%= app_name %>')
                 .cancel('Non, annuler');
 
             $mdDialog.show(confirm).then(function() {
-                for (var i = 0; i < $scope.selected.length; i++) {
-                    <%= serviceName %>.delete({}, $scope.selected[i], function(elt) {
+                function deleteElt(eltToDelete){
+                    function success() {
+                        var index = $scope.selected.indexOf(eltToDelete);
+                        $scope.selected.splice(index, 1);
                         $scope.loadDatas();
                         $mdToast.show(
                             $mdToast.simple()
@@ -95,7 +103,9 @@ angular.module('<%= app_name %>')
                             .toastClass('success-toast')
                             .hideDelay(3000)
                         );
-                    }, function(err){
+                    }
+
+                    function error() {
                         $mdToast.show(
                             $mdToast.simple()
                             .textContent('Erreur lors de la suppression...')
@@ -103,22 +113,29 @@ angular.module('<%= app_name %>')
                             .toastClass('error-toast')
                             .hideDelay(3000)
                         );
-                    });
+                    }
+                    <%= serviceName %>.delete({}, eltToDelete, success, error);
+                }
+                for (var i = 0; i < $scope.selected.length; i++) {
+                    var eltToDelete = $scope.selected[i];
+                    deleteElt(eltToDelete);
                 }
             }, function() {
 
             });
-        }
+        };
 
-        $scope.showList = function(){
-            if(!$mdMedia('sm')){
+        $scope.showList = function() {
+            if (!$mdMedia('sm')) {
                 return true;
             }
-            return $scope.<%= selectedName %> == null;
-        }
+            return $scope.
+            <%= selectedName %> === null;
+        };
 
-        function <%= controllerName %>($scope, $mdDialog, <%= serviceName %>) {
-           	$scope.<%= model %> = new <%= serviceName %>();
+        function <%= controllerName %> ($scope, $mdDialog, <%= serviceName %>) {
+            $scope.
+            <%= model %> = new <%= serviceName %> ();
 
             activate();
 
@@ -134,11 +151,13 @@ angular.module('<%= app_name %>')
                 $mdDialog.cancel();
             };
 
-            $scope.<%= addMethod %> = function() {
+            $scope.
+            <%= addMethod %> = function() {
                 if ($scope.createForm.$valid) {
-                    $mdDialog.hide($scope.<%= model %>);
+                    $mdDialog.hide($scope.
+                        <%= model %>);
                 }
             };
-        }        
+        }
 
     });
